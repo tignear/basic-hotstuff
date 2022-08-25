@@ -28,7 +28,7 @@ defmodule BasicHotStuff.Role.Replica do
           }
         } = ctx
       ) do
-    Logger.debug("replica: prepare")
+    Logger.debug("replica@prepare: enter state")
 
     leader = leader.(cur_view)
 
@@ -59,7 +59,7 @@ defmodule BasicHotStuff.Role.Replica do
           }
         } = ctx
       ) do
-    Logger.debug("replica: pre_commit")
+    Logger.debug("replica@pre_commit: enter state")
 
     leader = leader.(cur_view)
 
@@ -90,15 +90,13 @@ defmodule BasicHotStuff.Role.Replica do
           }
         } = ctx
       ) do
-    Logger.debug("replica: commit")
+    Logger.debug("replica@commit: enter state")
 
     leader = leader.(cur_view)
 
     case wait_for_message_qc(leader, cur_view, :pre_commit) do
       {:ok, m} ->
         ctx = %{ctx | locked_qc: m.justify}
-        Logger.debug("replica@commit: send vote")
-
         send_msg(leader, vote_msg(:commit, cur_view, m.justify.node, nil, key), node_id)
         decide(ctx)
 
@@ -115,7 +113,7 @@ defmodule BasicHotStuff.Role.Replica do
           }
         } = ctx
       ) do
-    Logger.debug("replica: decide")
+    Logger.debug("replica@decide: enter state")
 
     case wait_for_message_qc(leader.(cur_view), cur_view, :commit) do
       {:ok, _m} ->
@@ -137,11 +135,10 @@ defmodule BasicHotStuff.Role.Replica do
           }
         } = ctx
       ) do
-    Logger.debug("replica: next_view")
+    Logger.debug("replica@next_view: enter state")
 
     ctx = ctx |> Map.put(:cur_view, cur_view + 1)
     notice_next_view.(node_id, ctx)
-    Process.sleep(1)
     send_msg(leader.(cur_view + 1), msg(:new_view, cur_view, nil, prepare_qc), node_id)
 
     prepare(ctx)

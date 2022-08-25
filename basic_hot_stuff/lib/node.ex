@@ -3,7 +3,7 @@ defmodule BasicHotStuff.Node do
   alias BasicHotStuff.Role.{Replica, Leader}
   require Logger
 
-  @next_view_timeout 5000
+  @next_view_timeout 100
   def start_link(
         %{
           cur_view: _cur_view,
@@ -22,6 +22,7 @@ defmodule BasicHotStuff.Node do
   end
 
   def init(options) do
+
     options = %{options | config: options.config |> Map.put(:node_id, self())}
     {:ok, pid} = DynamicSupervisor.start_link(strategy: :one_for_one)
 
@@ -58,7 +59,6 @@ defmodule BasicHotStuff.Node do
     Process.send_after(self(), {:next_view, ctx.cur_view}, @next_view_timeout)
     st = Map.delete(st, :leader)
     st = Map.merge(st, ctx)
-    IO.inspect(st)
     if st.config.leader.(ctx.cur_view) == self() do
       {:ok, pid} =
         DynamicSupervisor.start_child(
@@ -73,11 +73,11 @@ defmodule BasicHotStuff.Node do
   end
 
   def handle_info({:message, _msg, _sender} = m, st) do
+
     relay_msg(m, st)
   end
 
   def handle_info({:next_view, _view_number} = m, st) do
-    Logger.debug("received message:#{inspect(m)}")
 
     relay_msg(m, st)
   end

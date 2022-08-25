@@ -30,12 +30,11 @@ defmodule BasicHotStuff.Role.Leader do
           clients_command: clients_command
         } = ctx
       ) do
-    Logger.debug("leader: prepare")
+    Logger.debug("leader@prepare: enter state")
 
     case wait_for_new_view_messages(n - f, cur_view, prepare_qc, []) do
       {:ok, messages} ->
         high_qc = (messages |> Enum.max_by(& &1.justify.view_number)).justify
-        IO.inspect(high_qc)
         cur_proposal = create_leaf(high_qc.node, clients_command)
         broadcast_msg(nodes.(), msg(:prepare, cur_view, cur_proposal, high_qc), node_id)
         pre_commit(ctx |> Map.delete(:clients_command))
@@ -57,7 +56,7 @@ defmodule BasicHotStuff.Role.Leader do
           }
         } = ctx
       ) do
-    Logger.debug("leader: pre_commit")
+    Logger.debug("leader@pre_commit: enter state")
 
     case wait_for_votes(n - f, cur_view, :prepare, prepare_qc, []) do
       {:ok, votes} ->
@@ -70,7 +69,6 @@ defmodule BasicHotStuff.Role.Leader do
           commit(ctx)
         else
           _ ->
-            IO.inspect(votes)
             raise "not implemented"
         end
 
@@ -92,7 +90,7 @@ defmodule BasicHotStuff.Role.Leader do
           }
         } = ctx
       ) do
-    Logger.debug("leader: commit")
+    Logger.debug("leader@commit: enter state")
 
     case wait_for_votes(n - f, cur_view, :pre_commit, prepare_qc, []) do
       {:ok, votes} ->
@@ -123,7 +121,7 @@ defmodule BasicHotStuff.Role.Leader do
           }
         } = ctx
       ) do
-    Logger.debug("leader: decide")
+    Logger.debug("leader@decide: enter state")
 
     case wait_for_votes(n - f, cur_view, :commit, prepare_qc, []) do
       {:ok, votes} ->

@@ -14,7 +14,8 @@ defmodule BasicHotStuff.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger,:crypto,:public_key]
+      mod: {BasicHotStuff, []},
+      extra_applications: [:logger, :crypto, :public_key]
     ]
   end
 
@@ -25,4 +26,5 @@ defmodule BasicHotStuff.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end
+
 end

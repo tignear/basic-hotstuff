@@ -13,7 +13,6 @@ defmodule BasicHotStuff.Role.Util do
   end
 
   def wait_for_new_view_messages(require_count, cur_view, prepare_qc, messages, rec) do
-    Logger.debug("wait for #{cur_view - 1}")
 
     receive do
       {:message, m, _addr} when matching_msg(m, :new_view, cur_view - 1) ->
@@ -33,7 +32,6 @@ defmodule BasicHotStuff.Role.Util do
 
   def wait_for_votes(require_count, _cur_view, _type, _prepare_qc, messages, _rec)
       when length(messages) >= require_count do
-    Logger.debug("wait_for_votes:return")
 
     {:ok, messages}
   end
@@ -45,7 +43,6 @@ defmodule BasicHotStuff.Role.Util do
   def wait_for_votes(require_count, cur_view, type, prepare_qc, messages, rec) do
     receive do
       {:message, %{partial_sig: _sig} = m, _addr} when matching_msg(m, type, cur_view) ->
-        Logger.debug("wait_for_votes:#{inspect(m)},#{cur_view},#{inspect type}")
         wait_for_votes(require_count, cur_view, type, prepare_qc, [m | messages], rec - 1)
 
       {:message, m, _addr} ->
@@ -79,7 +76,7 @@ defmodule BasicHotStuff.Role.Util do
     end
   end
 
-  def wait_for_message_qc(leader, cur_view, type, rec \\ 5)
+  def wait_for_message_qc(leader, cur_view, type, rec \\ 10)
 
   def wait_for_message_qc(leader, cur_view, type, 0) do
     raise "infinite loop"

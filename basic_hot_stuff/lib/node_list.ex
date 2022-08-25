@@ -8,4 +8,8 @@ defmodule BasicHotStuff.NodeList do
   def value do
     Agent.get(__MODULE__, & &1)
   end
+
+  def set(lst) do
+    Agent.update(__MODULE__, fn _ -> lst end)
+  end
 end
